@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>SYSTEM</title>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  background: black;
+  color: #00ff00;
+  font-family: monospace;
+}
+
+/* tela inicial */
+#tela {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+h1 {
+  color: red;
+  font-size: 40px;
+}
+
+.botao {
+  margin-top: 30px;
+  font-size: 26px;
+  padding: 15px 30px;
+  background: black;
+  color: red;
+  border: 2px solid red;
+}
+
+/* terminal */
+#terminal {
+  display: none;
+  padding: 15px;
+  font-size: 15px;
+  white-space: pre-wrap;
+}
+
+.critico {
+  color: lime;
+  font-size: 36px;
+  font-weight: bold;
+  text-shadow: 0 0 15px lime;
+  margin: 20px 0;
+}
+
+.alerta {
+  color: #00ff00;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.erro {
+  color: red;
+  font-size: 20px;
+}
+
+/* tremida */
+.treme {
+  animation: shake 0.2s infinite;
+}
+
+@keyframes shake {
+  0% { transform: translate(1px, 1px); }
+  50% { transform: translate(-1px, -1px); }
+  100% { transform: translate(1px, -1px); }
+}
+</style>
+</head>
+
+<body>
+
+<div id="tela">
+  <h1 id="texto">📢 CUIDADO 📢<br>NÃO CLIQUE AQUI</h1>
+  <button class="botao" onclick="proximo()">CLICAR</button>
+</div>
+
+<div id="terminal"></div>
+
+<script>
+let etapa = 0;
+let intervalo;
+let audioCtx;
+
+/* som de teclado SEM arquivo */
+function somTecla() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.value = 800 + Math.random() * 400;
+  gain.gain.value = 0.02;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.03);
+}
+
+function proximo() {
+  const texto = document.getElementById("texto");
+  etapa++;
+
+  if (etapa === 1) texto.innerText = "É SÉRIO.\nNÃO CLIQUE.";
+  else if (etapa === 2) texto.innerText = "EU AVISEI.";
+  else if (etapa === 3) iniciarAtaque();
+}
+
+function iniciarAtaque() {
+  document.getElementById("tela").style.display = "none";
+  const terminal = document.getElementById("terminal");
+  terminal.style.display = "block";
+  document.body.classList.add("treme");
+
+  intervalo = setInterval(escreverLinha, 80);
+}
+
+function escreverLinha() {
+  const terminal = document.getElementById("terminal");
+
+  if (Math.random() < 0.25) {
+    digitarHTML(`<div class="critico">SISTEMA COMPROMETIDO</div>`);
+    digitarHTML(`<div class="alerta">INVADINDO DISPOSITIVO</div>`);
+    digitarHTML(`<div class="erro">ACESSO NÃO AUTORIZADO</div>`);
+  } else {
+    digitarTexto(linhaCaotica() + "\n");
+  }
+}
+
+function digitarTexto(texto) {
+  let i = 0;
+  const terminal = document.getElementById("terminal");
+
+  const dig = setInterval(() => {
+    terminal.innerText += texto[i];
+    somTecla();
+    i++;
+    if (i >= texto.length) clearInterval(dig);
+  }, 15);
+}
+
+function digitarHTML(html) {
+  const terminal = document.getElementById("terminal");
+  terminal.innerHTML += html;
+}
+
+function linhaCaotica() {
+  const chars = "@&#€&#×&$£\";@*×('U×£'WHJXUJWJE)×€'^-^×;SGDH0123456789";
+  let linha = "";
+  let tamanho = Math.floor(Math.random() * 60) + 30;
+  for (let i = 0; i < tamanho; i++) {
+    linha += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return linha;
+}
+
+/* saída segura */
+document.addEventListener("dblclick", () => {
+  clearInterval(intervalo);
+  document.body.classList.remove("treme");
+  alert("SIMULAÇÃO ENCERRADA");
+  location.reload();
+});
+</script>
+
+</body>
+</html>
